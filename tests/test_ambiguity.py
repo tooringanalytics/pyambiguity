@@ -226,7 +226,7 @@ class TestAmbiguity(unittest.TestCase):
         args['plot2_file'] = os.path.join(self._OUTPUT_DIR,
                                           "fig_2_fcode1.png")
         print(args)
-        print(ambiguity(**args))
+        self.assertTrue(ambiguity(**args))
 
     def test_ambiguity_fcode0(self):
         """ Test code path when no frequency coding.
@@ -238,7 +238,7 @@ class TestAmbiguity(unittest.TestCase):
         args['plot2_file'] = os.path.join(self._OUTPUT_DIR,
                                           "fig_2_fcode0.png")
         print(args)
-        print(ambiguity(**args))
+        self.assertTrue(ambiguity(**args))
 
     def test_ambiguity_signals(self):
         """ Test all the given sample signals
@@ -255,4 +255,4 @@ class TestAmbiguity(unittest.TestCase):
             args['plot2_file'] = plot2_file
             args['plot_format'] = xtn
             print(args)
-            print(ambiguity(**args))
+            self.assertTrue(ambiguity(**args))
