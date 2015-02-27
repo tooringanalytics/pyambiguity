@@ -250,7 +250,12 @@ class TestAmbiguity(unittest.TestCase):
         args['plot2_file'] = os.path.join(self._OUTPUT_DIR,
                                           "fig_2_fcode1.png")
         print(args)
-        self.assertTrue(ambiguity(**args))
+
+        (delay, freq, a) = ambiguity(**args)
+
+        self.assertTrue(delay is not None and
+                        freq is not None and
+                        a is not None)
 
     def test_ambiguity_fcode0(self):
         """ Test code path when no frequency coding.
@@ -263,7 +268,12 @@ class TestAmbiguity(unittest.TestCase):
         args['plot2_file'] = os.path.join(self._OUTPUT_DIR,
                                           "fig_2_fcode0.png")
         print(args)
-        self.assertTrue(ambiguity(**args))
+
+        (delay, freq, a) = ambiguity(**args)
+
+        self.assertTrue(delay is not None and
+                        freq is not None and
+                        a is not None)
 
     def test_ambiguity_signals(self):
         """ Test all the given sample signals
@@ -281,7 +291,11 @@ class TestAmbiguity(unittest.TestCase):
             args['plot2_file'] = plot2_file
             args['plot_format'] = xtn
             print(args)
-            self.assertTrue(ambiguity(**args))
+            (delay, freq, a) = ambiguity(**args)
+
+            self.assertTrue(delay is not None and
+                            freq is not None and
+                            a is not None)
 
     def test_input_signals(self):
         for (signal_name, args) in self._TEST_CASES.items():
@@ -304,7 +318,12 @@ class TestAmbiguity(unittest.TestCase):
         args['plot2_file'] = plot2_file
         args['plot_format'] = xtn
         print(args)
-        self.assertTrue(ambiguity(**args))
+        (delay, freq, a) = ambiguity(**args)
+
+        self.assertTrue(delay is not None and
+                        freq is not None and
+                        a is not None)
+
 
     def test_sfptrain(self):
         xtn = self._OUTPUT_FORMAT
@@ -322,4 +341,9 @@ class TestAmbiguity(unittest.TestCase):
         args['plot2_file'] = plot2_file
         args['plot_format'] = xtn
         print(args)
-        self.assertTrue(ambiguity(**args))
+        (delay, freq, a) = ambiguity(**args)
+
+        self.assertTrue(delay is not None and
+                        freq is not None and
+                        a is not None)
+

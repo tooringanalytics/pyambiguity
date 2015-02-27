@@ -74,8 +74,10 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
               plot1_file=None,
               plot2_file=None,
               plot_format="svg",
-              plot_mesh=True):
-    """ Entry point for translated code.
+              plot_mesh=True,
+              elev=50,
+              azim=-135):
+    """ Compute Ambiguity & generate Plots for given input parameters
     Params:
     -------
     u_basic: numpy.ndarray or array-like. Input signal.
@@ -94,6 +96,13 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
      etc. Check matplotlib docs for supported formats.)
     plot_mesh: bool. If True (default), plots a mesh, if False plots a
     surface.
+    elev: float.(default=50) Elevation for 3-D plot viewpoint.
+    azim: float.(default=-135) Azimuth in degrees for 3-D plot viewpoint.
+
+    Returns:
+    --------
+    (delay, freq, a): 3-tuple of array_like's, where delay, freq and a
+    are the time, frequence and amplitude values.
     """
 
     # Initialization
@@ -335,7 +344,7 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     # Initialize the camera position. Matplotlib has a
     # different default orientation that matlab, so
     # elev & azimuth are adjusted accordingly.
-    ax3d.view_init(elev=50., azim=-135)  # (-40, 50)
+    ax3d.view_init(elev=elev, azim=azim)
 
     # ax3d.axis([-1 * np.inf, np.inf, -1 * np.inf, np.inf, 0, 1])
 
@@ -355,4 +364,5 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     else:
         plt.show()
 
-    return True
+
+    return (delay, freq, a)

@@ -38,8 +38,10 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
               plot1_file=None,
               plot2_file=None,
               plot_format="svg",
-              plot_mesh=True):
-    """ Entry point for translated code.
+              plot_mesh=True,
+              elev=50,
+              azim=-135):
+    """ Compute Ambiguity & generate Plots for given input parameters
     Params:
     -------
     u_basic: numpy.ndarray or array-like. Input signal.
@@ -58,7 +60,10 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
      etc. Check matplotlib docs for supported formats.)
     plot_mesh: bool. If True (default), plots a mesh, if False plots a
     surface.
+    elev: float.(default=50) Elevation for 3-D plot viewpoint.
+    azim: float.(default=-135) Azimuth in degrees for 3-D plot viewpoint.
     """
+
 ```
 
 To use, first import the ambiguity module as follows:
