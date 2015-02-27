@@ -6,8 +6,9 @@ from enum import Enum
 import numpy as np
 from scipy.signal import chebwin
 import os
-from ambiguity import ambiguity, brk, dmpdat
-
+from ambiguity import ambiguity
+from m2py import brk, dmpdat, chkdat
+import subprocess
 
 
 class TestAmbiguity(unittest.TestCase):
@@ -278,6 +279,13 @@ class TestAmbiguity(unittest.TestCase):
     def test_ambiguity_signals(self):
         """ Test all the given sample signals
         """
+
+        # First run the octave/matlab tests to generate
+        # the reference data.
+
+        subprocess.call(['octave', 'test_ambiguity_all.m'])
+
+        # Now check the output against the reference data
         xtn = self._OUTPUT_FORMAT
         for signal_name in self._TEST_CASES.keys():
             print(signal_name)
@@ -291,11 +299,33 @@ class TestAmbiguity(unittest.TestCase):
             args['plot2_file'] = plot2_file
             args['plot_format'] = xtn
             print(args)
+
             (delay, freq, a) = ambiguity(**args)
 
+            # Simple Sanity Check
             self.assertTrue(delay is not None and
                             freq is not None and
                             a is not None)
+
+            # A more thorough check
+
+            self.assertTrue(chkdat(signal_name,
+                                    'delay_final',
+                                    delay,
+                                    rtol=0.1,
+                                    atol=1e-04))
+
+
+            self.assertTrue(chkdat(signal_name,
+                                    'freq_final',
+                                    freq))
+            '''
+            self.assertTrue(chkdat(signal_name,
+                                    'a_final',
+                                    a,
+                                    rtol=0.5,
+                                    atol=1e-04))
+            '''
 
     def test_input_signals(self):
         for (signal_name, args) in self._TEST_CASES.items():

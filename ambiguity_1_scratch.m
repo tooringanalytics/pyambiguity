@@ -197,6 +197,13 @@ function ambiguity_1_scratch (u_basic, fcode, f_basic, F, K, T, N, sr, plotdir, 
     zlabel(' |{\it\\chi}({\it\tau},{\it\nu})| ','Fontsize',12);
     hold off;
     print('-dsvg', [ plotdir '/' signal_name '_fig_2' '.svg']);
+
+    savdat(signal_name, 'delay_final', delay);
+
+    savdat(signal_name, 'freq_final', freq);
+
+    savdat(signal_name, 'a_final', a);
+
 endfunction
 
 function dmpdat (nm, ex)

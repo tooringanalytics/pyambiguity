@@ -112,3 +112,7 @@ ambiguity(u_basic,
 if plot1_file and plot2_file are None or not given, the function
 will attempt to pop up a matplotlib interactive display to show the plot.
 
+You can use the elev and azim optional parameters to set up the initial
+view point in the 3-D plot. The plot_mesh boolean argument,
+(default: True), decides whether a mesh grid or a colormapped surface
+is plotted in the 3-D plot.

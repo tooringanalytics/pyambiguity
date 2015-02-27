@@ -15,53 +15,6 @@ from matplotlib import cm
 DEFAULT_SIGNAL = np.ones((1, 51))
 
 
-def dmpdat(s, e):
-    """ Dump a data structure with its name & shape.
-    Params:
-    -------
-    s: str. The name of the structure
-    e: expression. An expression to dump. Implicitly assumes e is
-    array_like
-    """
-    print("%s:" % s)
-    print(e)
-    print("%s.shape:" % s)
-    print(e.shape)
-    print("%s.dtype:" % s)
-    print(e.dtype)
-    print("-------------------------------------------")
-
-
-def hbrk(msg=None):
-    if msg is not None:
-        print(msg)
-    exit(-1)
-
-
-def brk(s, e):
-    """ Used for debugging, just break the script, dumping data.
-    """
-    dmpdat(s, e)
-    exit(-1)
-
-
-def chkdat(t, s, e):
-    """ Check this matrix against data dumped by octave
-    """
-    from scipy.io import loadmat
-    import os
-    mat = loadmat(os.path.join('check_data', t, s) + '.mat')['ex']
-    dmpdat(s + '<python>', e)
-    dmpdat(s + '<matlab>', mat)
-    is_equal = np.allclose(e, mat, rtol=1e-05, atol=1e-08)
-    #is_equal =  np.array_equal(e, mat)
-    print("iEqual=%d" % is_equal)
-    if not is_equal:
-        np.savetxt(os.path.join("check_data", t, s) + '_python_err', e)
-        np.savetxt(os.path.join("check_data", t, s) + '_matlab_err', mat)
-        hbrk("FAILED check on expr: %s, signal: %s" % (s, t))
-
-
 def ambiguity(u_basic=DEFAULT_SIGNAL,
               fcode=True,
               f_basic=None,
@@ -106,7 +59,7 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     """
 
     # Initialization
-    chkdat(plot_title, 'u_basic', u_basic)
+
     m_basic = np.amax(u_basic.shape)
     u = None
 
@@ -128,43 +81,43 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     else:
         dt = 1 / r
         ud = np.diagflat(u_basic)
-        chkdat(plot_title, 'ud', ud)
+
         ao = np.ones((r, m_basic))
-        chkdat(plot_title, 'ao', ao)
+
         m = m_basic * r
         ao_dot_ud = np.dot(ao, ud)
-        chkdat(plot_title, 'ao_dot_ud', ao_dot_ud)
+
         # MATLAB/Octave uses fortran-like row-major order reshaping
         u_basic = np.reshape(ao_dot_ud, (1, m), order='F')
-        chkdat(plot_title, 'u_basic_reshaped', u_basic)
+
         uamp = np.abs(u_basic)
-        chkdat(plot_title, 'uamp', uamp)
+
         phas = np.angle(u_basic)
-        chkdat(plot_title, 'phas', phas)
+
         u = u_basic
         if fcode:
             ff = np.diagflat(f_basic)
-            chkdat(plot_title, 'ff', ff)
+
             coef = 2 * np.pi * dt
             vecprod = np.dot(ao, ff)
-            chkdat(plot_title, 'vecprod', vecprod)
+
             vecprod_reshaped = np.reshape(vecprod, (1, m), order='F')
-            chkdat(plot_title, 'vecprod_reshaped', vecprod_reshaped)
+
             cumsummed = np.reshape(np.cumsum(vecprod_reshaped),
                                    (1, m),
                                    order='F')
-            chkdat(plot_title, 'cumsummed', cumsummed)
+
             add_term = np.multiply(coef, cumsummed)
-            chkdat(plot_title, 'add_term', add_term)
+
             phas = add_term + phas
-            chkdat(plot_title, 'phas_add', phas)
+
             comprod = np.multiply(1.0j, phas)
-            chkdat(plot_title, 'comprod', comprod)
+
             uexp = np.exp(comprod)
-            #brk('uexp', uexp)
+
             u = np.multiply(uamp, uexp)
-            chkdat(plot_title, 'u', u)
-            #brk("u", u[:, 10076:])
+
+
 
     t = np.array([np.arange(0, r * m_basic) / r])
 
@@ -188,18 +141,20 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     plt.clf()
     plt.hold(False)
 
-    plt.subplot(3, 1, 1)
+    axis1 = plt.subplot(3, 1, 1)
     zerovec = np.array([[0]])
     abs_uamp = np.abs(uamp)
-    #brk('abs(uamp)', abs_uamp)
+
     ar1 = np.hstack((zerovec, abs_uamp))
     ar2 = np.hstack((ar1, zerovec))
-    #brk('ar2[:,9898:]', ar2[:, 9898:])
+
     plt.plot(tscale1.flatten(),
              ar2.flatten(),
              c="r",
              linewidth=1.5)
     plt.ylabel(' $Amplitude$ ')
+    #axis1.set_xlim(-np.inf, np.inf)
+    #axis1.set_ylim(-np.inf, np.amax(abs_uamp) + 0.05*np.amax(abs_uamp));
 
     plt.subplot(3, 1, 2)
     plt.plot(t.flatten(),
