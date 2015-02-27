@@ -141,37 +141,38 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     plt.clf()
     plt.hold(False)
 
-    axis1 = plt.subplot(3, 1, 1)
+    axes1 = plt.subplot(3, 1, 1)
     zerovec = np.array([[0]])
     abs_uamp = np.abs(uamp)
 
     ar1 = np.hstack((zerovec, abs_uamp))
     ar2 = np.hstack((ar1, zerovec))
 
-    plt.plot(tscale1.flatten(),
-             ar2.flatten(),
-             c="r",
-             linewidth=1.5)
-    plt.ylabel(' $Amplitude$ ')
-    #axis1.set_xlim(-np.inf, np.inf)
-    #axis1.set_ylim(-np.inf, np.amax(abs_uamp) + 0.05*np.amax(abs_uamp));
+    axes1.plot(tscale1.flatten(),
+               ar2.flatten(),
+               c="r",
+               linewidth=1.5)
+    axes1.set_ylabel(' $Amplitude$ ')
+    #axes1.set_xlim(-np.inf, np.inf)
+    #axes1.set_ylim(-np.inf, np.amax(abs_uamp) + 0.05*np.amax(abs_uamp));
 
-    plt.subplot(3, 1, 2)
-    plt.plot(t.flatten(),
-             phas.flatten(),
-             c="r",
-             linewidth=1.5)
-    # plt.axis(np.array([-np.inf, np.inf, -np.inf, np.inf]))
-    plt.ylabel(' $Phase [rad]$ ')
+    axes2 = plt.subplot(3, 1, 2)
+    axes2.plot(t.flatten(),
+               phas.flatten(),
+               c="r",
+               linewidth=1.5)
 
-    plt.subplot(3, 1, 3)
-    plt.plot(t.flatten(),
-             (dphas * np.ceil(np.amax(t))).flatten(),
-             c="r",
-             linewidth=1.5)
     # plt.axis(np.array([-np.inf, np.inf, -np.inf, np.inf]))
-    plt.xlabel(' $\\itt/t_b$ ')
-    plt.ylabel(' $\\itf*Mt_b$ ')
+    axes2.set_ylabel(' $Phase [rad]$ ')
+
+    axes3 = plt.subplot(3, 1, 3)
+    axes3.plot(t.flatten(),
+               (dphas * np.ceil(np.amax(t))).flatten(),
+               c="r",
+               linewidth=1.5)
+    # plt.axis(np.array([-np.inf, np.inf, -np.inf, np.inf]))
+    axes3.set_xlabel(' $\\itt/t_b$ ')
+    axes3.set_ylabel(' $\\itf*Mt_b$ ')
 
     fig_1.suptitle(plot_title + ', 2-D Plot')
 
@@ -183,7 +184,6 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     dtau = np.ceil(T * m) * dt / N
 
     tau = np.round(np.dot(np.array([np.arange(0., N+1., 1.)]), dtau / dt)) * dt
-
 
     f = np.array([np.dot(np.arange(0., K+1, 1.), df)])
     f = np.hstack((-1 * np.fliplr(f), f))
@@ -208,7 +208,8 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     ar2 = npml.repmat(ridx, 1, m + Tm)
     index = np.add(ar1, ar2)
 
-    u_padded_rep = np.array([ u_padded[0,colindex] for colindex in index])
+    u_padded_rep = np.array([u_padded[0, colindex]
+                            for colindex in index])
 
     mat2 = scipy.sparse.csc_matrix(u_padded_rep)
 
@@ -226,12 +227,12 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     # hence, np.dot(e, uu_pos.conj()) =
     # uu_pos.conj().transpose(True).dot(e.T).transpose(True)
 
-    uu_pos_dash = uu_pos.transpose(True).conj()
-    uu_pos_dash_trans = uu_pos_dash.transpose(True)
+    # uu_pos_dash = uu_pos.transpose(True).conj()
+    # uu_pos_dash_trans = uu_pos_dash.transpose(True)
     e_sparse = scipy.sparse.csc_matrix(e)
-    e_trans = e_sparse.transpose(True)
-    e_dot_uu_pos_dash = (uu_pos_dash_trans.dot(e_trans)).transpose(True)
-
+    # e_trans = e_sparse.transpose(True)
+    # e_dot_uu_pos_dash = (uu_pos_dash_trans.dot(e_trans)).transpose(True)
+    e_dot_uu_pos_dash = e_sparse.dot(uu_pos.conj().transpose(True))
     a_pos = np.abs(e_dot_uu_pos_dash.toarray())
 
     a_pos = a_pos / np.amax(np.amax(a_pos))

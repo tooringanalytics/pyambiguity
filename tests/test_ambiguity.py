@@ -59,10 +59,11 @@ class TestAmbiguity(unittest.TestCase):
         },
 
         'Weighted LFM': {
-            'u_basic': np.conj(np.array([np.sqrt(chebwin(51, 50))])),
+            'u_basic': np.conj(np.array([np.sqrt(chebwin(51, 50))])).T,
             'fcode': True,
-            'f_basic': np.multiply(0.0031, np.array(np.arange(-25, 26)),
-                                                    dtype=float),
+            'f_basic': np.multiply(0.0031,
+                                   np.array(np.arange(-25, 26),
+                                            dtype=float)),
             'F': 6,
             'K': 60,
             'T': 1.1,
@@ -193,7 +194,7 @@ class TestAmbiguity(unittest.TestCase):
 
         'Weighted Stepped Freq. Pulse Train': {
             'u_basic': np.multiply(
-                                   np.conj(np.sqrt(chebwin(36, 50))),
+                                   np.conj(np.sqrt(chebwin(36, 50))).T,
                                    np.array([[1, 0, 0, 0, 0,
                                               1, 0, 0, 0, 0,
                                               1, 0, 0, 0, 0,
@@ -298,6 +299,8 @@ class TestAmbiguity(unittest.TestCase):
             args['plot1_file'] = plot1_file
             args['plot2_file'] = plot2_file
             args['plot_format'] = xtn
+            args['plot_mesh'] = False
+
             print(args)
 
             (delay, freq, a) = ambiguity(**args)
@@ -310,21 +313,20 @@ class TestAmbiguity(unittest.TestCase):
             # A more thorough check
 
             self.assertTrue(chkdat(signal_name,
-                                    'delay_final',
-                                    delay,
-                                    rtol=0.1,
-                                    atol=1e-04))
-
+                                   'delay_final',
+                                   delay,
+                                   rtol=0.1,
+                                   atol=1e-04))
 
             self.assertTrue(chkdat(signal_name,
-                                    'freq_final',
-                                    freq))
+                                   'freq_final',
+                                   freq))
             '''
             self.assertTrue(chkdat(signal_name,
-                                    'a_final',
-                                    a,
-                                    rtol=0.5,
-                                    atol=1e-04))
+                                   'a_final',
+                                   a,
+                                   rtol=0.5,
+                                   atol=1e-04))
             '''
 
     def test_input_signals(self):
