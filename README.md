@@ -69,8 +69,8 @@ Then, set up the input parameters for calling the method,
 for e.g.:
 
 ```
-u_basic = np.ones((1, 51)),
-fcode =  True,
+u_basic = np.ones((1, 51))
+fcode =  True
 f_basic = np.dot(0.0031,
                  np.array(np.arange(-25, 26)))
 F = 6
