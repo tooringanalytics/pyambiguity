@@ -25,6 +25,7 @@ Usage:
 
 This is the function signature for the 'ambiguity' method:
 
+```
 def ambiguity(u_basic=DEFAULT_SIGNAL,
               fcode=True,
               f_basic=None,
@@ -58,7 +59,7 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     plot_mesh: bool. If True (default), plots a mesh, if False plots a
     surface.
     """
-
+```
 
 To use, first import the ambiguity module as follows:
 
@@ -67,6 +68,7 @@ from ambiguity import ambiguity
 Then, set up the input parameters for calling the method,
 for e.g.:
 
+```
 u_basic = np.ones((1, 51)),
 fcode =  True,
 f_basic = np.dot(0.0031,
@@ -81,9 +83,11 @@ plot1_file = 'fig_1.png' #Optional
 plot2_file = 'fig_2.png' #Optional
 plot_format = 'png'      #Optional
 plot_mesh = True         #Optional
+```
 
 Now call the ambiguity function with the above parameters:
 
+```
 ambiguity(u_basic,
           fcode,
           f_basic,
@@ -96,6 +100,7 @@ ambiguity(u_basic,
           plot1_file,
           plot2_file,
           plot_mesh)
+```
 
 if plot1_file and plot2_file are None or not given, the function
 will attempt to pop up a matplotlib interactive display to show the plot.
