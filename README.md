@@ -68,7 +68,9 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
 
 To use, first import the ambiguity module as follows:
 
+```
 from ambiguity import ambiguity
+```
 
 Then, set up the input parameters for calling the method,
 for e.g.:
