@@ -2,10 +2,12 @@
 """
 import unittest
 
-from ambiguity import ambiguity
+from enum import Enum
 import numpy as np
-import scipy.signal
+from scipy.signal import chebwin
 import os
+from ambiguity import ambiguity, brk, dmpdat
+
 
 
 class TestAmbiguity(unittest.TestCase):
@@ -33,7 +35,7 @@ class TestAmbiguity(unittest.TestCase):
 
     _TEST_CASES = {
 
-        "Pulse": {
+        'Pulse': {
             'u_basic': np.array([[1]]),
             'fcode': False,
             'f_basic': None,
@@ -56,9 +58,10 @@ class TestAmbiguity(unittest.TestCase):
         },
 
         'Weighted LFM': {
-            'u_basic': np.array([np.sqrt(scipy.signal.chebwin(51, 50))]),
+            'u_basic': np.conj(np.array([np.sqrt(chebwin(51, 50))])),
             'fcode': True,
-            'f_basic': np.multiply(0.0031, np.array(np.arange(-25, 26))),
+            'f_basic': np.multiply(0.0031, np.array(np.arange(-25, 26)),
+                                                    dtype=float),
             'F': 6,
             'K': 60,
             'T': 1.1,
@@ -69,7 +72,7 @@ class TestAmbiguity(unittest.TestCase):
         'Costas 7': {
             'u_basic': np.ones((1, 7)),
             'fcode': True,
-            'f_basic': np.array([[4, 7, 1, 6, 5, 2, 3]]),
+            'f_basic': np.array([[4, 7, 1, 6, 5, 2, 3]], dtype=float),
             'F': 12,
             'K': 60,
             'T': 1.1,
@@ -81,7 +84,7 @@ class TestAmbiguity(unittest.TestCase):
             'u_basic': np.array([[1, 1, 1, 1,
                                   1, -1, -1, 1,
                                   1, -1, 1, -1,
-                                  1]]),
+                                  1]], dtype=float),
             'fcode': False,
             'f_basic': None,
             'F': 10,
@@ -92,7 +95,7 @@ class TestAmbiguity(unittest.TestCase):
         },
 
         'Frank 16': {
-            'u_basic': np.array([[1, 1, 1, 1, 1,
+            'u_basic': np.array([[1., 1, 1, 1, 1,
                                   1j, -1, -1j, 1,
                                   -1, 1, -1, 1,
                                   -1j, -1, 1j]]),
@@ -107,8 +110,10 @@ class TestAmbiguity(unittest.TestCase):
 
         'P4 25': {
             'u_basic': np.exp(1j * np.pi * (1./25. *
-                              np.power(np.array([np.arange(0, 25)]), 2) -
-                                       np.array([np.arange(0, 25)]))),
+                              np.power(np.array([np.arange(0, 25)],
+                                       dtype=float), 2) -
+                                       np.array([np.arange(0, 25)],
+                                        dtype=float))),
             'fcode': False,
             'f_basic': None,
             'F': 15,
@@ -119,9 +124,10 @@ class TestAmbiguity(unittest.TestCase):
         },
 
         'Complementary Pair': {
-            'u_basic': np.array([[1, 1, -1, 0,
-                                  0, 0, 0, 0,
-                                  0, 1, 1j, 1]]),
+            'u_basic': np.array([[1., 1., -1., 0.,
+                                  0., 0., 0., 0.,
+                                  0., 0, 1., 1.0j,
+                                  1.]]),
             'fcode': False,
             'f_basic': None,
             'F': 10,
@@ -137,10 +143,10 @@ class TestAmbiguity(unittest.TestCase):
                                   1, 0, 0, 0, 0,
                                   1, 0, 0, 0, 0,
                                   1, 0, 0, 0, 0,
-                                  1]]),
+                                  1]], dtype=float),
             'fcode': False,
             'f_basic': None,
-            'F': 16,
+            'F': 15,
             'K': 80,
             'T': 1.05,
             'N': 100,
@@ -153,7 +159,7 @@ class TestAmbiguity(unittest.TestCase):
                                   1, 0, 0, 0, 0,
                                   1, 0, 0, 0, 0,
                                   1, 0, 0, 0, 0,
-                                  1]]),
+                                  1]], dtype=float),
             'fcode': False,
             'f_basic': None,
             'F': 12,
@@ -169,14 +175,14 @@ class TestAmbiguity(unittest.TestCase):
                                   1, 0, 0, 0, 0,
                                   1, 0, 0, 0, 0,
                                   1, 0, 0, 0, 0,
-                                  1]]),
+                                  1]], dtype=float),
             'fcode': True,
             'f_basic': np.multiply(0.78, np.array([[0, 0, 0, 0, 0,
                                                     1, 0, 0, 0, 0,
                                                     2, 0, 0, 0, 0,
                                                     3, 0, 0, 0, 0,
                                                     4, 0, 0, 0, 0,
-                                                    5]])),
+                                                    5]], dtype=float)),
             'F': 12,
             'K': 80,
             'T': 0.042,
@@ -185,7 +191,8 @@ class TestAmbiguity(unittest.TestCase):
         },
 
         'Weighted Stepped Freq. Pulse Train': {
-            'u_basic': np.multiply(np.conj(np.sqrt(scipy.signal.chebwin(36, 50))),
+            'u_basic': np.multiply(
+                                   np.conj(np.sqrt(chebwin(36, 50))),
                                    np.array([[1, 0, 0, 0, 0,
                                               1, 0, 0, 0, 0,
                                               1, 0, 0, 0, 0,
@@ -193,7 +200,7 @@ class TestAmbiguity(unittest.TestCase):
                                               1, 0, 0, 0, 0,
                                               1, 0, 0, 0, 0,
                                               1, 0, 0, 0, 0,
-                                              1]])),
+                                              1]], dtype=float)),
             'fcode': True,
             'f_basic': np.multiply(0.7, np.array([[0, 0, 0, 0, 0,
                                                    1, 0, 0, 0, 0,
@@ -202,7 +209,7 @@ class TestAmbiguity(unittest.TestCase):
                                                    4, 0, 0, 0, 0,
                                                    5, 0, 0, 0, 0,
                                                    6, 0, 0, 0, 0,
-                                                   7]])),
+                                                   7]], dtype=float)),
             'F': 16,
             'K': 70,
             'T': 0.03,
@@ -210,6 +217,22 @@ class TestAmbiguity(unittest.TestCase):
             'sr': 5,
         },
 
+    }
+
+
+    _SIGNAL_MAP = {
+        'pulse': 'Pulse',
+        'lfm': 'LFM',
+        'wlfm': 'Weighted LFM',
+        'costas7': 'Costas 7',
+        'barker13': 'Barker 13',
+        'frank16': 'Frank 16',
+        'p4_25': 'P4 25',
+        'comppair': 'Complementary Pair',
+        'ptrain1': 'Pulse Train 1',
+        'ptrain2': 'Pulse Train 2',
+        'sfptrain': 'Stepped Freq. Pulse Train',
+        'wsfptrain': 'Weighted Stepped Freq. Pulse Train',
     }
 
     def setUp(self):
@@ -220,6 +243,7 @@ class TestAmbiguity(unittest.TestCase):
         """ Test basic functionality
         """
         args = self.SIMPLE_ARGS.copy()
+        args['plot_title'] = 'ambiguity_fcode1'
         args['fcode'] = True
         args['plot1_file'] = os.path.join(self._OUTPUT_DIR,
                                           "fig_1_fcode1.png")
@@ -232,6 +256,7 @@ class TestAmbiguity(unittest.TestCase):
         """ Test code path when no frequency coding.
         """
         args = self.SIMPLE_ARGS.copy()
+        args['plot_title'] = 'ambiguity_fcode0'
         args['fcode'] = False
         args['plot1_file'] = os.path.join(self._OUTPUT_DIR,
                                           "fig_1_fcode0.png")
@@ -251,8 +276,50 @@ class TestAmbiguity(unittest.TestCase):
             plot2_file = os.path.join(self._OUTPUT_DIR,
                                       signal_name + "_fig_2." + xtn)
             args = self._TEST_CASES[signal_name]
+            args['plot_title'] = signal_name
             args['plot1_file'] = plot1_file
             args['plot2_file'] = plot2_file
             args['plot_format'] = xtn
             print(args)
             self.assertTrue(ambiguity(**args))
+
+    def test_input_signals(self):
+        for (signal_name, args) in self._TEST_CASES.items():
+            print(signal_name)
+            dmpdat('u_basic', args['u_basic'])
+
+    def test_wsfptrain(self):
+        xtn = self._OUTPUT_FORMAT
+        signal = 'wsfptrain'
+        signal_name = self._SIGNAL_MAP[signal]
+
+        print(signal_name)
+        plot1_file = os.path.join(self._OUTPUT_DIR,
+                                  signal_name + "_fig_1." + xtn)
+        plot2_file = os.path.join(self._OUTPUT_DIR,
+                                  signal_name + "_fig_2." + xtn)
+        args = self._TEST_CASES[signal_name]
+        args['plot_title'] = signal_name
+        args['plot1_file'] = plot1_file
+        args['plot2_file'] = plot2_file
+        args['plot_format'] = xtn
+        print(args)
+        self.assertTrue(ambiguity(**args))
+
+    def test_sfptrain(self):
+        xtn = self._OUTPUT_FORMAT
+        signal = 'sfptrain'
+        signal_name = self._SIGNAL_MAP[signal]
+
+        print(signal_name)
+        plot1_file = os.path.join(self._OUTPUT_DIR,
+                                  signal_name + "_fig_1." + xtn)
+        plot2_file = os.path.join(self._OUTPUT_DIR,
+                                  signal_name + "_fig_2." + xtn)
+        args = self._TEST_CASES[signal_name]
+        args['plot_title'] = signal_name
+        args['plot1_file'] = plot1_file
+        args['plot2_file'] = plot2_file
+        args['plot_format'] = xtn
+        print(args)
+        self.assertTrue(ambiguity(**args))

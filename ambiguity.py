@@ -27,7 +27,15 @@ def dmpdat(s, e):
     print(e)
     print("%s.shape:" % s)
     print(e.shape)
+    print("%s.dtype:" % s)
+    print(e.dtype)
     print("-------------------------------------------")
+
+
+def hbrk(msg=None):
+    if msg is not None:
+        print(msg)
+    exit(-1)
 
 
 def brk(s, e):
@@ -35,6 +43,23 @@ def brk(s, e):
     """
     dmpdat(s, e)
     exit(-1)
+
+
+def chkdat(t, s, e):
+    """ Check this matrix against data dumped by octave
+    """
+    from scipy.io import loadmat
+    import os
+    mat = loadmat(os.path.join('check_data', t, s) + '.mat')['ex']
+    dmpdat(s + '<python>', e)
+    dmpdat(s + '<matlab>', mat)
+    is_equal = np.allclose(e, mat, rtol=1e-05, atol=1e-08)
+    #is_equal =  np.array_equal(e, mat)
+    print("iEqual=%d" % is_equal)
+    if not is_equal:
+        np.savetxt(os.path.join("check_data", t, s) + '_python_err', e)
+        np.savetxt(os.path.join("check_data", t, s) + '_matlab_err', mat)
+        hbrk("FAILED check on expr: %s, signal: %s" % (s, t))
 
 
 def ambiguity(u_basic=DEFAULT_SIGNAL,
@@ -45,9 +70,11 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
               T=0,
               N=0,
               sr=0,
+              plot_title="",
               plot1_file=None,
               plot2_file=None,
-              plot_format="svg"):
+              plot_format="svg",
+              plot_mesh=True):
     """ Entry point for translated code.
     Params:
     -------
@@ -65,10 +92,12 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     plot2_file: str. Name of file where second plot will be stored
     plot_format: str. Output format for plot. (e.g. 'svg', 'png', 'pdf'
      etc. Check matplotlib docs for supported formats.)
+    plot_mesh: bool. If True (default), plots a mesh, if False plots a
+    surface.
     """
 
     # Initialization
-
+    chkdat(plot_title, 'u_basic', u_basic)
     m_basic = np.amax(u_basic.shape)
     u = None
 
@@ -89,27 +118,44 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
         u = np.multiply(uamp, uexp)
     else:
         dt = 1 / r
-        ud = np.diag(u_basic[0])
+        ud = np.diagflat(u_basic)
+        chkdat(plot_title, 'ud', ud)
         ao = np.ones((r, m_basic))
+        chkdat(plot_title, 'ao', ao)
         m = m_basic * r
-        u_basic = np.reshape(np.dot(ao, ud), (1, m))
+        ao_dot_ud = np.dot(ao, ud)
+        chkdat(plot_title, 'ao_dot_ud', ao_dot_ud)
+        # MATLAB/Octave uses fortran-like row-major order reshaping
+        u_basic = np.reshape(ao_dot_ud, (1, m), order='F')
+        chkdat(plot_title, 'u_basic_reshaped', u_basic)
         uamp = np.abs(u_basic)
+        chkdat(plot_title, 'uamp', uamp)
         phas = np.angle(u_basic)
+        chkdat(plot_title, 'phas', phas)
         u = u_basic
         if fcode:
-            ff = np.diag(f_basic.flatten())
-
+            ff = np.diagflat(f_basic)
+            chkdat(plot_title, 'ff', ff)
             coef = 2 * np.pi * dt
             vecprod = np.dot(ao, ff)
-            vecprod_reshaped = np.reshape(vecprod.T, (1, m))
-            cumsummed = np.cumsum(vecprod_reshaped)
+            chkdat(plot_title, 'vecprod', vecprod)
+            vecprod_reshaped = np.reshape(vecprod, (1, m), order='F')
+            chkdat(plot_title, 'vecprod_reshaped', vecprod_reshaped)
+            cumsummed = np.reshape(np.cumsum(vecprod_reshaped),
+                                   (1, m),
+                                   order='F')
+            chkdat(plot_title, 'cumsummed', cumsummed)
             add_term = np.multiply(coef, cumsummed)
-            phas = np.add(add_term, phas)
-
-            comprod = 1.0j * phas
+            chkdat(plot_title, 'add_term', add_term)
+            phas = add_term + phas
+            chkdat(plot_title, 'phas_add', phas)
+            comprod = np.multiply(1.0j, phas)
+            chkdat(plot_title, 'comprod', comprod)
             uexp = np.exp(comprod)
-
+            #brk('uexp', uexp)
             u = np.multiply(uamp, uexp)
+            chkdat(plot_title, 'u', u)
+            #brk("u", u[:, 10076:])
 
     t = np.array([np.arange(0, r * m_basic) / r])
 
@@ -136,23 +182,39 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     plt.subplot(3, 1, 1)
     zerovec = np.array([[0]])
     abs_uamp = np.abs(uamp)
+    #brk('abs(uamp)', abs_uamp)
     ar1 = np.hstack((zerovec, abs_uamp))
     ar2 = np.hstack((ar1, zerovec))
-    plt.plot(tscale1[0], ar2[0], c="r", linewidth=1.5)
+    #brk('ar2[:,9898:]', ar2[:, 9898:])
+    plt.plot(tscale1.flatten(),
+             ar2.flatten(),
+             c="r",
+             linewidth=1.5)
+    plt.ylabel(' $Amplitude$ ')
 
     plt.subplot(3, 1, 2)
-    plt.plot(t[0], phas[0], c="r", linewidth=1.5)
+    plt.plot(t.flatten(),
+             phas.flatten(),
+             c="r",
+             linewidth=1.5)
     # plt.axis(np.array([-np.inf, np.inf, -np.inf, np.inf]))
     plt.ylabel(' $Phase [rad]$ ')
 
     plt.subplot(3, 1, 3)
-    plt.plot(t[0], (dphas * np.ceil(np.amax(t)))[0], c="r", linewidth=1.5)
+    plt.plot(t.flatten(),
+             (dphas * np.ceil(np.amax(t))).flatten(),
+             c="r",
+             linewidth=1.5)
     # plt.axis(np.array([-np.inf, np.inf, -np.inf, np.inf]))
     plt.xlabel(' $\\itt/t_b$ ')
     plt.ylabel(' $\\itf*Mt_b$ ')
 
+    fig_1.suptitle(plot_title + ', 2-D Plot')
+
     if plot1_file is not None:
-        plt.savefig(plot1_file, format=plot_format)
+        fig_1.savefig(plot1_file, format=plot_format)
+    else:
+        plt.show()
 
     dtau = np.ceil(T * m) * dt / N
 
@@ -176,7 +238,6 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     cidx = np.array([np.arange(0, int(m + Tm))]).astype(int)
 
     ridx = np.round(tau / dt).T.astype(int)
-
 
     # Use repmat instead of the explicit Tony's Trick in the matlab code
     ar1 = npml.repmat(cidx, N + 1, 1)
@@ -255,13 +316,11 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     mesh_z = np.vstack((np.zeros((1, amt)), a))
     (mesh_x, mesh_y) = np.meshgrid(x_coords, y_coords)
 
-    # If you want a wireframe, just uncomment the line
-    # below, and comment the line that plots the surface.
-
-    # ax3d.plot_wireframe(mesh_x, mesh_y, mesh_z)
-
-    ax3d.plot_surface(mesh_x, mesh_y, mesh_z,
-                      linewidth=0, cmap=cm.coolwarm)
+    if plot_mesh:
+        ax3d.plot_wireframe(mesh_x, mesh_y, mesh_z)
+    else:
+        ax3d.plot_surface(mesh_x, mesh_y, mesh_z,
+                          linewidth=0, cmap=cm.coolwarm)
 
     plt.hold(True)
 
@@ -289,7 +348,11 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
 
     plt.hold(False)
 
+    fig_2.suptitle(plot_title + ', 3-D Plot')
+
     if plot2_file is not None:
-        plt.savefig(plot2_file, format=plot_format)
+        fig_2.savefig(plot2_file, format=plot_format)
+    else:
+        plt.show()
 
     return True
