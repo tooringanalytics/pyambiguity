@@ -1,0 +1,4 @@
+distribute>=0.7.3
+numpy>=1.9.1
+scipy>=0.15.1
+matplotlib>=1.4.2

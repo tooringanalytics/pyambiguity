@@ -43,8 +43,10 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     T: float. Maximal Delay for ambiguity plot [in units of Mtb]
     N: int. Number of delay grid points on each side (e.g. 100)
     sr: int/float. Over sampling ratio (>=1) (e.g. 10)
-    plot1_file: str. Name of file where first plot will be stored
-    plot2_file: str. Name of file where second plot will be stored
+    plot1_file: str. Name of file where first plot will be stored.
+    If 'None', pops up an itneractive window to display this plot.
+    plot2_file: str. Name of file where second plot will be stored.
+    If 'None', pops up an itneractive window to display this plot.
     plot_format: str. Output format for plot. (e.g. 'svg', 'png', 'pdf'
      etc. Check matplotlib docs for supported formats.)
     plot_mesh: bool. If True (default), plots a mesh, if False plots a

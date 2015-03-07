@@ -7,18 +7,26 @@ A python module for computing the Ambiguity Function for analyzing radar signals
 Requirements:
 --------------
 
-- Python-2.7
-- numpy
-- scipy
-- matplotlib
+- distribute>=0.7.3
+- numpy>=1.9.1
+- scipy>=0.15.1
+- If using a virtualenv, [any suitable display backend for matplotlib](http://stackoverflow.com/questions/9054718/matplotlib-doesnt-display-graph-in-virtualenv "Stackoverflow discussion on this.")
+- matplotlib>=1.4.2
 
 
 Please ensure the above dependencies are met before running this script
 
 Numpy, Scipy and matplotlib can be installed by:
 
+```
 pip install numpy scipy matplotlib
+```
 
+Or, by using the bundled requirements.txt:
+
+```
+pip install --upgrade --force-reinstall -r requirements.txt
+```
 
 Usage:
 ------
@@ -54,14 +62,21 @@ def ambiguity(u_basic=DEFAULT_SIGNAL,
     T: float. Maximal Delay for ambiguity plot [in units of Mtb]
     N: int. Number of delay grid points on each side (e.g. 100)
     sr: int/float. Over sampling ratio (>=1) (e.g. 10)
-    plot1_file: str. Name of file where first plot will be stored
-    plot2_file: str. Name of file where second plot will be stored
+    plot1_file: str. Name of file where first plot will be stored.
+    If 'None', pops up an itneractive window to display this plot.
+    plot2_file: str. Name of file where second plot will be stored.
+    If 'None', pops up an itneractive window to display this plot.
     plot_format: str. Output format for plot. (e.g. 'svg', 'png', 'pdf'
      etc. Check matplotlib docs for supported formats.)
     plot_mesh: bool. If True (default), plots a mesh, if False plots a
     surface.
     elev: float.(default=50) Elevation for 3-D plot viewpoint.
     azim: float.(default=-135) Azimuth in degrees for 3-D plot viewpoint.
+
+    Returns:
+    --------
+    (delay, freq, a): 3-tuple of array_like's, where delay, freq and a
+    are the time, frequence and amplitude values.
     """
 
 ```
@@ -76,6 +91,8 @@ Then, set up the input parameters for calling the method,
 for e.g.:
 
 ```
+import numpy as np
+
 u_basic = np.ones((1, 51))
 fcode =  True
 f_basic = np.dot(0.0031,
