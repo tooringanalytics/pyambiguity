@@ -123,6 +123,7 @@ ambiguity(u_basic,
           plot_title,
           plot1_file,
           plot2_file,
+          plot_format,
           plot_mesh)
 ```
 
